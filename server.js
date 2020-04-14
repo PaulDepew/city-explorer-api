@@ -13,8 +13,19 @@ const PORT = process.env.PORT || 3000;
 
 app.use(express.static('./public'));
 
-app.get('/hello', (request, response) => {
-  response.status(200).send('Hello');
+app.get('/location', (request, response) => {
+  let geoData = require('./data/geo.json');
+  let city = request.query.city;
+  let display = new City(city, geoData[0]);
+
+  function City(city, geoData) {
+    this.search_query = city;
+    this.formatted_query = geoData.display_name;
+    this.latitude = geoData.lat;
+    this.longitude = geoData.lon;
+  }
+
+  response.status(200).json(display);
 });
 
 // app.get('/data', (request, response) => {
