@@ -14,4 +14,46 @@ We are using Node.JS, JSON languages to manipulate Express, cors and dotenv.
 
 ## Change Log
 Initalized project -> Placed all of the initial files and started to adapt them to the assignment.
+
+Added Location.json data implementation
+
 -->
+
+Number and name of feature: 1. Locations
+
+Estimate of time needed to complete: 1 hour
+
+Start time: 10:00
+
+Finish time: 12:30
+
+Actual time needed to complete: 2:30
+
+// 
+
+Number and name of feature: 2. Weather
+
+Estimate of time needed to complete: 1 hour
+
+Start time: 12:30
+
+Finish time: 1:30
+
+Actual time needed to complete: 1 hour
+
+//
+Number and name of feature: Weather
+
+Estimate of time needed to complete: 1 hour
+
+Start time: 12:30
+
+Finish time: 1:30
+
+Actual time needed to complete: 1 hour
+
+## Credits:
+Kent
+Joseph
+Chance!
+Brandon
