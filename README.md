@@ -42,13 +42,13 @@ Finish time: 1:30
 Actual time needed to complete: 1 hour
 
 //
-Number and name of feature: Weather
+Number and name of feature: Errors
 
 Estimate of time needed to complete: 1 hour
 
-Start time: 12:30
+Start time: 1:30
 
-Finish time: 1:30
+Finish time: 
 
 Actual time needed to complete: 1 hour
 
