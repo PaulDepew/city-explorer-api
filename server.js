@@ -47,7 +47,7 @@ function weather (city, weatherData) {
   let newObj = {};
 
     newObj.forecast = day.summary;
-    newObj.time = new Date(day.time);
+    newObj.time = new Date(day.time).toDateString();
 
     weatherArr.push(newObj);
   });
