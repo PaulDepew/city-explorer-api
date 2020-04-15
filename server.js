@@ -16,6 +16,7 @@ app.use(express.static('./public'));
 
 // Get Location Data
 app.get('/location', (request, response) => {
+  let {latitude, longitude} = request.query;
   // let geoData = require('./data/geo.json');
   let city = request.query.city;
   let key = process.env.GEOCODE_API_KEY;
@@ -41,34 +42,75 @@ function City(city, geoData) {
   this.longitude = geoData.lon;
 };
 
+function Trails(element) {
+  this.name = element.name;
+  this.location = element.location;
+  this.length = element.length;
+  this.stars = element.stars;
+  this.star_votes = element.starVotes;
+  this.summer = element.summery;
+
+  this.trail_url = element.url;
+  this.conditions = element.conditionDetails;
+
+  this.condition_date = new Date(splitDate(element.conditionDate[0])).toDateString();
+  this.condition_time = splitDate(element.conditionDate)[1];
+}
+
+const splitDate = (str) => str.split(' ');
+
 // Get Weather Data
 app.get('/weather', (request, response) => {
-  let weatherData = require('./data/darksky.json');
+  let {latitude, longitude} = request.query;
   let city = request.query.city;
-  let display = weather(city, weatherData);
-  response.status(200).json(display);
+  let key = process.env.WEATHER_API_KEY;
+  let url = `https://api.weatherbit.io/v2.0/forecast/daily?lat=${latitude}&lon=${longitude}&key=${key}`;
+
+  superagent.get(url)
+    .then(weatherResponse => {
+      const weatherData = weatherResponse.body.data;
+      let display = weather(city, weatherData);
+      response.send(display);
+    }).catch(error => handleError('Weather Data went wrong', request, response));
+
 });
 
 function weather (city, weatherData) {
   const weatherArr = [];
-  let data = weatherData.daily.data;
-
-  data.forEach(day => {
+  weatherData.forEach(day => {
     let newObj = {};
 
-    newObj.forecast = day.summary;
-    newObj.time = new Date(day.time).toDateString();
+    newObj.forecast = day.weather.description;
+    newObj.time = new Date(day.datetime).toDateString();
 
     weatherArr.push(newObj);
   });
+  console.log(weatherArr);
   return weatherArr;
 }
+
+// Get Trails
+
+function handleTrails (request, response) {
+  let {latitude, longitude} = request.query;
+  const key = process.env.TRAIL_API_KEY;
+  const url = `https://www.hikingproject.com/data/get-trails?lat=${latitude}&lon=${longitude}&maxDistance=10&key=${key}`;
+
+  superagent.get(url).then(trailResponse => {
+    const data = trailResponse.body.trails;
+    response.send(data.map(element => {
+      return new Trails(element);
+    }));
+  }).catch(error => handleError('Trail Error@!!@', request, response));
+}
+
+app.get('/trails', handleTrails);
 
 // Error Handler
 
 function handleError (error, request, response) {
   response.status(500).send(error);
 }
-// app.use('*', (request, response) => response.send('Sorry, something went wrong'));
+
 
 app.listen(PORT,() => console.log(`Listening on port ${PORT}`));
