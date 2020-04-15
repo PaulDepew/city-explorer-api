@@ -61,7 +61,6 @@ const splitDate = (str) => str.split(' ');
 
 // Get Weather Data
 app.get('/weather', (request, response) => {
-  // let weatherData = require('./data/darksky.json');
   let {latitude, longitude} = request.query;
   let city = request.query.city;
   let key = process.env.WEATHER_API_KEY;
@@ -78,13 +77,12 @@ app.get('/weather', (request, response) => {
 
 function weather (city, weatherData) {
   const weatherArr = [];
-  // let data = weatherData.daily.data;
   weatherData.forEach(day => {
     let newObj = {};
-    
+
     newObj.forecast = day.weather.description;
     newObj.time = new Date(day.datetime).toDateString();
-    
+
     weatherArr.push(newObj);
   });
   console.log(weatherArr);
@@ -113,6 +111,6 @@ app.get('/trails', handleTrails);
 function handleError (error, request, response) {
   response.status(500).send(error);
 }
-// app.use('*', (request, response) => response.send('Sorry, something went wrong'));
+
 
 app.listen(PORT,() => console.log(`Listening on port ${PORT}`));

@@ -48,7 +48,40 @@ Estimate of time needed to complete: 1 hour
 
 Start time: 1:30
 
-Finish time: 
+Finish time: 2:00
+
+Actual time needed to complete: 30 minutes
+
+//
+Number and name of feature: API-location
+
+Estimate of time needed to complete: 1 hour
+
+Start time: 10:00
+
+Finish time: 11:00
+
+Actual time needed to complete: 1 hour
+
+//
+Number and name of feature: API-Weather
+
+Estimate of time needed to complete: 1 hour
+
+Start time: 11:00
+
+Finish time: 12:00
+
+Actual time needed to complete: 1 hour
+
+//
+Number and name of feature: API-Trails
+
+Estimate of time needed to complete: 1 hour
+
+Start time: 12:00
+
+Finish time: 11:00
 
 Actual time needed to complete: 1 hour
 
@@ -57,3 +90,5 @@ Kent
 Joseph
 Chance!
 Brandon
+Ken
+Peyton
