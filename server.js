@@ -85,7 +85,7 @@ function weather (city, weatherData) {
 
     weatherArr.push(newObj);
   });
-  console.log(weatherArr);
+  // console.log(weatherArr);
   return weatherArr;
 }
 
