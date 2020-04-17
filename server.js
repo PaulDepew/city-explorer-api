@@ -1,8 +1,10 @@
 'use strict';
 
+// require and initiate libraries
 require('dotenv').config();
 const express = require('express');
 const app = express();
+const pg = require('pg');
 
 const cors = require('cors');
 const superagent = require('superagent');
@@ -12,27 +14,61 @@ app.use(cors());
 
 const PORT = process.env.PORT || 3000;
 
+const dbClient = new pg.Client(process.env.DATABASE_URL);
+
+dbClient.connect(error => {
+  if (error) {
+    console.error('This was an Error', error.stack);
+  } else {
+    console.log('Were connected');
+  }
+});
+
 app.use(express.static('./public'));
 
 // Get Location Data
 app.get('/location', (request, response) => {
-  let {latitude, longitude} = request.query;
-  // let geoData = require('./data/geo.json');
   let city = request.query.city;
   let key = process.env.GEOCODE_API_KEY;
   let url = `https://us1.locationiq.com/v1/search.php?key=${key}&q=${city}&format=json&limit=1`;
+  // SQL Request
+  let matchSQL = `SELECT * FROM locations WHERE search_query = ($1);`;
+  let cityValue = [city];
 
-  superagent.get(url)
-    .then(location => {
-      let data = location.body;
-      for (var i in data) {
-        let display = new City(city, data[i]);
-        response.send(display);
-      }})
-    .catch(error => handleError('LocationError: Sorry, something went wrong', request, response));
+  dbClient.query(matchSQL, cityValue)
+    .then(sqlResults => {
+    // check if results are in the database
+      if (sqlResults.rows.length === 0){
+        superagent.get(url).then(locationResponse=> {
+          const data = locationResponse.body;
+          for (let i in data) {
+            if (data[i].display_name.search(city)) {
+              console.log('New Item Created');
+              const location = new City(city, data[i]);
+              response.send(location);
+              let insertSQL = `INSERT INTO locations (search_query, formatted_query, latitude, longitude) VALUES ($1, $2, $3, $4) RETURNING *:`;
+              let insertValues = [city, data[0].display_name, data[0].lat, data[0].lon];
+
+              dbClient.query(insertSQL, insertValues).then(record => {
+              //insert
+              }).catch(error => {
+                handleError('Location Error', request, response)});
+            } else {
+              console.log('Retrieved stored');
+              response.send(record.rows[0]);
+            }
+          }
+        }).catch(error => {
+          handleError('Location error', request, response);
+        });
+      }
+    }
+    );
 }
-  // response.status(200).json(display);
 );
+
+
+
 
 // Location Constructor
 function City(city, geoData) {
@@ -42,6 +78,8 @@ function City(city, geoData) {
   this.longitude = geoData.lon;
 };
 
+
+// Trails Constructor
 function Trails(element) {
   this.name = element.name;
   this.location = element.location;
@@ -75,6 +113,8 @@ app.get('/weather', (request, response) => {
 
 });
 
+
+// Create Weather Objects
 function weather (city, weatherData) {
   const weatherArr = [];
   weatherData.forEach(day => {
@@ -85,12 +125,10 @@ function weather (city, weatherData) {
 
     weatherArr.push(newObj);
   });
-  // console.log(weatherArr);
   return weatherArr;
 }
 
 // Get Trails
-
 function handleTrails (request, response) {
   let {latitude, longitude} = request.query;
   const key = process.env.TRAIL_API_KEY;
@@ -107,7 +145,6 @@ function handleTrails (request, response) {
 app.get('/trails', handleTrails);
 
 // Error Handler
-
 function handleError (error, request, response) {
   response.status(500).send(error);
 }
