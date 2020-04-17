@@ -85,6 +85,28 @@ Finish time: 11:00
 
 Actual time needed to complete: 1 hour
 
+//
+Number and name of feature: API-movies
+
+Estimate of time needed to complete: 1 hour
+
+Start time: 9:00
+
+Finish time: 9:30
+
+Actual time needed to complete: 30 minutes
+
+//
+Number and name of feature: API-Yelp
+
+Estimate of time needed to complete: 1 hour
+
+Start time: 9:30
+
+Finish time: 11:00
+
+Actual time needed to complete: 1.5 hours
+
 ## Credits:
 Kent
 Joseph
