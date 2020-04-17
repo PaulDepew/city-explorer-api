@@ -70,6 +70,7 @@ app.get('/location', (request, response) => {
 
 
 
+
 // Location Constructor
 function City(city, geoData) {
   this.search_query = city;
@@ -94,6 +95,63 @@ function Trails(element) {
   this.condition_date = new Date(splitDate(element.conditionDate[0])).toDateString();
   this.condition_time = splitDate(element.conditionDate)[1];
 }
+
+function Yelp(element) {
+  this.name = element.name;
+  this.image_url = element.image_url;
+  this.price = element.price;
+  this.rating = element.rating;
+  this.url = element.url;
+
+}
+
+// Movie Constructor
+function Movie(element) {
+  this.title = element.title;
+  this.overview = element.overview;
+  this.average_votes = element.vote_average;
+  this.total_votes = element.vote_count;
+  this.image_url = `https://image.tmdb.org/t/p/w500${element.backdrop_path}`;
+  this.popularity = element.popularity;
+  this.released_on = element.release_date;
+}
+
+// Get Movie Data
+
+app.get('/movies', (request, response) => {
+  // console.log(request.query);
+  let city = request.query.search_query;
+  let key = process.env.MOVIE_API_KEY;
+  let url = `https://api.themoviedb.org/3/search/movie?api_key=${key}&query=${city}`;
+
+  superagent.get(url)
+    .then(movieResponse => {
+      const movieData = movieResponse.body.results;
+      response.send(movieData.map(data => {
+       return new Movie(data);
+      }));
+    }).catch(error => handleError('Movie Data went wrong', request, response));
+
+});
+
+// Get Yelp Data
+
+app.get('/yelp', (request, response) => {
+  const { latitude, longitude } = request.query;
+  let city = request.query.search_query;
+  let key = process.env.YELP_API_KEY;
+  let url = `https://api.yelp.com/v3/businesses/search?latitude=${latitude}&longitude=${longitude}`;
+
+  superagent.get(url).set({ 'Authorization': 'Bearer ' + process.env.YELP_API_KEY})
+    .then(yelpResponse => {
+      const yelpData = yelpResponse.body.businesses;
+      // console.log(yelpData);
+      response.send(yelpData.map(data => {
+       return new Yelp(data);
+      }));
+    }).catch(error => handleError('Yelp Data went wrong', request, response));
+
+});
 
 const splitDate = (str) => str.split(' ');
 
