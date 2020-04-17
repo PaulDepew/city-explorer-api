@@ -32,30 +32,42 @@ app.get('/location', (request, response) => {
   let key = process.env.GEOCODE_API_KEY;
   let url = `https://us1.locationiq.com/v1/search.php?key=${key}&q=${city}&format=json&limit=1`;
   // SQL Request
-  let insertSQL = `INSERT INTO locations (search_query, formatted_query, latitude, longitude) VALUES ($1, $2, $3, $4) RETURNING *`;
-  // let matchSQL = `SELECT * FROM locations WHERE search_query = ($1);`;
-  // let cityValue = [city];
+  let matchSQL = `SELECT * FROM locations WHERE search_query = ($1);`;
+  let cityValue = [city];
 
-  superagent.get(url)
-    .then(location => {
-      let data = location.body;
-      let SQLvalues = [city, data[0].formatted_query, data[0].latitude, data[0].longitude];
+  dbClient.query(matchSQL, cityValue)
+    .then(sqlResults => {
+    // check if results are in the database
+      if (sqlResults.rows.length === 0){
+        superagent.get(url).then(locationResponse=> {
+          const data = locationResponse.body;
+          for (let i in data) {
+            if (data[i].display_name.search(city)) {
+              console.log('New Item Created');
+              const location = new City(city, data[i]);
+              response.send(location);
+              let insertSQL = `INSERT INTO locations (search_query, formatted_query, latitude, longitude) VALUES ($1, $2, $3, $4) RETURNING *:`;
+              let insertValues = [city, data[0].display_name, data[0].lat, data[0].lon];
 
-      // write new row and records/saves to db
-      dbClient.query(insertSQL, SQLvalues).then(record => {
-        console.log(record.rows);
-      }).catch(error => {
-        handleError('Database Failed', request, response);
-      })
-
-      // loop to checkl for location
-      for (var i in data) {
-        let display = new City(city, data[i]);
-        response.send(display);
-      }})
-    .catch(error => handleError('LocationError: Sorry, something went wrong', request, response));
+              dbClient.query(insertSQL, insertValues).then(record => {
+              //insert
+              }).catch(error => {
+                handleError('Location Error', request, response)});
+            } else {
+              console.log('Retrieved stored');
+              response.send(record.rows[0]);
+            }
+          }
+        }).catch(error => {
+          handleError('Location error', request, response);
+        });
+      }
+    }
+    );
 }
 );
+
+
 
 
 // Location Constructor
